@@ -12,7 +12,7 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding:ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,44 +20,31 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-binding.buttonLoad.setOnClickListener {
-    loadData()
-}
+        binding.buttonLoad.setOnClickListener {
+
+            loadData()
+        }
     }
 
     private fun loadData() {
         binding.progress.isVisible = true
         binding.buttonLoad.isEnabled = false
-       loadCity{ it ->
-           binding.tvLocation.text = it
-           loadTemp(it){
-                binding.tvTemperature.text = it.toString()
-                binding.progress.isVisible = false
-                binding.buttonLoad.isEnabled = true
-            }
-        }
+        binding.tvLocation.text = loadCity()
+        binding.tvTemperature.text = loadTemp(loadCity()).toString()
+        binding.progress.isVisible = false
+        binding.buttonLoad.isEnabled = true
+
     }
 
-    private fun loadTemp(city:String,callback: (Int) -> Unit) {
-        thread {
-            runOnUiThread {
-                Toast.makeText(this, "Loading temperature for city:$city", Toast.LENGTH_SHORT)
-                    .show()
-            }
-            Thread.sleep(3000)
-
-           runOnUiThread {
-                callback.invoke(25)
-            }
-        }
+    private fun loadTemp(city: String): Int {
+        Toast.makeText(this, "Loading temperature for city:$city", Toast.LENGTH_SHORT)
+            .show()
+        Thread.sleep(3000)
+        return 17
     }
 
-    private fun loadCity(callback:(String)->Unit) {
-        thread{
-            Thread.sleep(3000)
-            runOnUiThread {
-                callback.invoke("Bishkek")
-            }
-        }
+    private fun loadCity(): String {
+        Thread.sleep(3000)
+        return "Bishkek"
     }
 }
