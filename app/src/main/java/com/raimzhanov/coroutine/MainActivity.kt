@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.buttonLoad.setOnClickListener {
-
             loadData()
         }
     }
@@ -29,22 +28,32 @@ class MainActivity : AppCompatActivity() {
     private fun loadData() {
         binding.progress.isVisible = true
         binding.buttonLoad.isEnabled = false
-        binding.tvLocation.text = loadCity()
-        binding.tvTemperature.text = loadTemp(loadCity()).toString()
-        binding.progress.isVisible = false
-        binding.buttonLoad.isEnabled = true
+        loadCity { it ->
+            binding.tvLocation.text = it
+            loadTemp(it){
+                binding.tvTemperature.text = it.toString()
+                binding.progress.isVisible = false
+                binding.buttonLoad.isEnabled = true
+            }
+        }
+
 
     }
 
-    private fun loadTemp(city: String): Int {
-        Toast.makeText(this, "Loading temperature for city:$city", Toast.LENGTH_SHORT)
-            .show()
-        Thread.sleep(3000)
-        return 17
+    private fun loadTemp(city: String,callback: (Int) -> Unit){
+thread {
+    Toast.makeText(this, "Loading temperature for city:$city", Toast.LENGTH_SHORT)
+        .show()
+    Thread.sleep(3000)
+    callback.invoke(25)
+}
     }
 
-    private fun loadCity(): String {
-        Thread.sleep(3000)
-        return "Bishkek"
+    private fun loadCity(callback:(String)->Unit) {
+        thread {
+            Thread.sleep(3000)
+            callback.invoke("Bishkek")
+        }
+
     }
 }
