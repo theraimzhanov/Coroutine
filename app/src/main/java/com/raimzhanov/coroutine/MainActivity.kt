@@ -1,10 +1,8 @@
 package com.raimzhanov.coroutine
 
-import android.os.AsyncTask
+import android.os.*
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
 import androidx.core.view.isVisible
 import com.raimzhanov.coroutine.databinding.ActivityMainBinding
@@ -14,6 +12,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private val handler = object: Handler() {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            Log.d("TAG", "handleMessage:$msg ")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         binding.buttonLoad.setOnClickListener {
             loadData()
         }
+        handler.sendMessage(Message.obtain(handler,1,"hard work"))
     }
 
     private fun loadData() {
@@ -30,29 +35,29 @@ class MainActivity : AppCompatActivity() {
         binding.buttonLoad.isEnabled = false
         loadCity { it ->
             binding.tvLocation.text = it
-            loadTemp(it){
+            loadTemp(it) {
                 binding.tvTemperature.text = it.toString()
                 binding.progress.isVisible = false
                 binding.buttonLoad.isEnabled = true
             }
         }
-
-
     }
 
-    private fun loadTemp(city: String,callback: (Int) -> Unit){
-thread {
-    Toast.makeText(this, "Loading temperature for city:$city", Toast.LENGTH_SHORT)
-        .show()
-    Thread.sleep(3000)
-    callback.invoke(25)
-}
+    private fun loadTemp(city: String, callback: (Int) -> Unit) {
+        thread {
+            runOnUiThread {
+                Toast.makeText(this, "Loading temperature for city:$city", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            Thread.sleep(3000)
+            runOnUiThread { callback.invoke(25) }
+        }
     }
 
-    private fun loadCity(callback:(String)->Unit) {
+    private fun loadCity(callback: (String) -> Unit) {
         thread {
             Thread.sleep(3000)
-            callback.invoke("Bishkek")
+            runOnUiThread { callback.invoke("Bishkek") }
         }
 
     }
